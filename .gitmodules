@@ -1,0 +1,8 @@
+[submodule "dtc"]
+	path = dtc
+	url = https://android.googlesource.com/platform/external/dtc
+	branch = main
+[submodule "libufdt"]
+	path = libufdt
+	url = https://android.googlesource.com/platform/system/libufdt
+	branch = main
