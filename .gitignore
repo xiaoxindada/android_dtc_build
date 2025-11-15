@@ -1,4 +1,4 @@
-/dtc/build
+/build/**
 /dtc/dtc-lexer.c 
 /dtc/dtc-parser.c
 /dtc/dtc-parser.h
