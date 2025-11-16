@@ -101,8 +101,8 @@ set(fdtoverlay_srcs
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options("-O3")
-        if(CMAKE_C_COMPILE_ID  MATCHES "Clang")
+        add_compile_options("-Os")
+        if(CMAKE_C_COMPILER_ID MATCHES "Clang")
                 add_compile_options("-flto")
                 add_link_options("-flto")
         endif()
