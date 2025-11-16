@@ -14,12 +14,12 @@ function check_msys_clang64_environment() {
 
 function install_deps() {
     if grep -qo "debian" /etc/os-release; then
-        sudo apt install -y cmake gcc clang build-essential binutils nasm llvm lld libc++-dev libc++abi-dev ninja-build git wget flex bison
+        sudo apt install -y cmake gcc clang build-essential binutils nasm llvm lld libc++-dev libc++abi-dev ninja-build git wget flex bison zip unzip
     fi
 
     if uname -o | grep -qo "Msys"; then
         pacman -Sy --noconfirm
-        pacman -S --needed --noconfirm pactoys git unzip wget flex bison
+        pacman -S --needed --noconfirm pactoys git unzip wget flex bison zip unzip
         if [[ $MSYSTEM == "CLANG64" ]]; then
             pacboy -S --needed --noconfirm {clang,llvm,llvm-libs,libc++,lld,nasm,cmake,ninja}:p
         else
@@ -31,12 +31,11 @@ function install_deps() {
 
 
 function build() {
-    if uname | grep -qo "Linux"; then
-        export PATH="$LOCALDIR/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
-    fi
     if [[ $1 == "android" ]]; then
         export PATH="$LOCALDIR/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
         cc="aarch64-linux-android$2-$cc"
+    elif uname | grep -qo "Linux"; then
+        export PATH="$LOCALDIR/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
     fi
 
     cd dtc
@@ -45,9 +44,9 @@ function build() {
     bison -d -o dtc-parser.c dtc-parser.y
     cd ..
     rm -rf "build"
-    echo "cmake -DCMAKE_C_COMPILER=$c -G Ninja"
-    cmake -DCMAKE_C_COMPILER=$cc -DCMAKE_BUILD_TYPE="Release" -G "Ninja" -B "build"
-    cmake --build "build" -j$(nproc --all)
+    echo "cmake -DCMAKE_C_COMPILER=$cc -G Ninja"
+    cmake -DCMAKE_C_COMPILER=$cc -DCMAKE_BUILD_TYPE="Release" -G "Ninja" -B "build" || exit 1
+    cmake --build "build" -j$(nproc --all) || exit 1
 }
 
 function install() {
