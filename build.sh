@@ -31,6 +31,9 @@ function install_deps() {
 
 
 function build() {
+    if uname | grep -qo "Linux"; then
+        export PATH="$LOCALDIR/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+    fi
     if [[ $1 == "android" ]]; then
         export PATH="$LOCALDIR/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
         cc="aarch64-linux-android$2-$cc"
