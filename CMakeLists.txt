@@ -9,6 +9,31 @@ set(libfdt_srcs_dir "${dtc_srcs_dir}/libfdt")
 set(libufdt_srcs_dir "${CMAKE_SOURCE_DIR}/libufdt")
 set(mkdtimg_srcs_dir "${libufdt_srcs_dir}/utils/src")
 
+find_program(flex_program flex)
+find_program(bison_program bison)
+
+if(flex_program)
+        add_custom_command(
+                OUTPUT "${dtc_srcs_dir}/dtc-lexer.c"
+                COMMAND ${flex_program} -o dtc-lexer.c dtc-lexer.l
+                DEPENDS ${dtc_srcs_dir}/dtc-lexer.l
+                WORKING_DIRECTORY ${dtc_srcs_dir}
+        )
+else()
+         message(FATAL_ERROR "flex not installed")
+endif()
+if(bison_program)
+        add_custom_command(
+                OUTPUT ${dtc_srcs_dir}/dtc-parser.c 
+                       ${dtc_srcs_dir}/dtc-parser.h
+                COMMAND ${bison_program} -d -o dtc-parser.c dtc-parser.y
+                DEPENDS ${dtc_srcs_dir}/dtc-parser.y
+                WORKING_DIRECTORY ${dtc_srcs_dir}
+        )
+else()
+        message(FATAL_ERROR "bison not installed")
+endif()
+
 #get dtc version from Android.bp
 execute_process(
         COMMAND bash -c "echo $(sed -f ${dtc_srcs_dir}/METADATA_version.sed -n ${dtc_srcs_dir}/METADATA)"
@@ -17,9 +42,7 @@ execute_process(
 )
 message("dtc version: ${dtc_version}")
 set(VCS_TAG "${dtc_version}-Android-build")
-configure_file("${CMAKE_SOURCE_DIR}/dtc/version_gen.h.in" 
-                "${CMAKE_SOURCE_DIR}/dtc/version_gen.h"
-)
+configure_file("${CMAKE_SOURCE_DIR}/dtc/version_gen.h.in" "${CMAKE_SOURCE_DIR}/dtc/version_gen.h")
 
 include_directories(
         ${dtc_srcs_dir}
@@ -128,3 +151,5 @@ target_link_libraries(fdtput PRIVATE fdt)
 target_link_libraries(fdtdump PRIVATE fdt)
 target_link_libraries(fdtoverlay PRIVATE fdt)
 target_link_libraries(mkdtimg PRIVATE fdt ufdt_sysdeps)
+
+install(TARGETS dtc mkdtimg fdtget fdtput fdtdump fdtoverlay)

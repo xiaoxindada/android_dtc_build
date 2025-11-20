@@ -38,11 +38,6 @@ function build() {
         export PATH="$LOCALDIR/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
     fi
 
-    cd dtc
-    rm  dtc-lexer.c dtc-parser.c dtc-parser.h
-    flex -o dtc-lexer.c dtc-lexer.l
-    bison -d -o dtc-parser.c dtc-parser.y
-    cd ..
     rm -rf "build"
     echo "cmake -DCMAKE_C_COMPILER=$cc -G Ninja"
     cmake -DCMAKE_C_COMPILER=$cc -DCMAKE_BUILD_TYPE="Release" -G "Ninja" -B "build" || exit 1
@@ -50,21 +45,7 @@ function build() {
 }
 
 function install() {
-    mkdir -p "build/bin" "build/lib"
-    cd "build"
-    [[ -e "dtc" ]] && mv "dtc" "bin"
-    [[ -e "mkdtimg" ]] && mv "mkdtimg" "bin"
-    [[ -e "fdtget" ]] && mv "fdtget" "bin"
-    [[ -e "fdtput" ]] && mv "fdtput" "bin"
-    [[ -e "fdtdump" ]] && mv "fdtdump" "bin"
-    [[ -e "fdtoverlay" ]] && mv "fdtoverlay" "bin"
-    if ls | grep -qo ".a"; then
-        mv *.a lib
-    fi
-    if ls | grep -qo ".so"; then
-        mv *.so lib
-    fi
-    cd $LOCALDIR
+    cmake --install "build" --prefix "build" || exit 1
 }
 
 install_deps
